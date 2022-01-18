@@ -18,7 +18,7 @@ Lancer le serveur:
 ```bash
     symfony serve
 ```
-**L'application sera dispobible à l'addresse: "http://localhost:8000"**
+**L'API sera dispobible à l'addresse: "http://localhost:8000/api"**
 
 Pour les personnes utilisant *Docker*, lancer le service "mysql":
 ```bash

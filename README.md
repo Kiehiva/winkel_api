@@ -25,5 +25,3 @@ Pour les personnes utilisant *Docker*, lancer le service "mysql":
     docker-compose up -d
 ```
 La base de donnée se configurera seule.
-
-RK1PF

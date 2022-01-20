@@ -2,20 +2,24 @@
 
 namespace App\Entity;
 
+use App\Traits\Timestamp;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SubcategoryRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: SubcategoryRepository::class)]
+#[
+    ORM\Entity(repositoryClass: SubcategoryRepository::class),
+    ORM\HasLifecycleCallbacks()
+]
 #[ApiResource(
     collectionOperations: [
         'get' => ['normalization_context' => ['groups' => ['read:subcategories']]],
         'post' => ['denormalization_context' => ['groups' => ['create:subcategories']]]
     ],
     itemOperations: [
-        'get' => ['normalization_context' => ['groups' => ['read:subcategories']]],
+        'get' => ['normalization_context' => ['groups' => ['read:subcategories', 'read:default']]],
         'patch' => ['denormalization_context' => ['groups' => ['update:subcategory']]],
         'delete'
     ]
@@ -23,6 +27,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class Subcategory
 {
+    use Timestamp;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]

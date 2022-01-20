@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Traits\Timestamp;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\Collection;
@@ -10,11 +11,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: CategoryRepository::class)]
+#[
+    ORM\Entity(repositoryClass: CategoryRepository::class),
+    ORM\HasLifecycleCallbacks()
+]
 #[ApiResource(
     collectionOperations: [
         'get' => [
-            'normalization_context' => ['groups' => 'read:categories']
+            'normalization_context' => ['groups' => ['read:categories']]
         ],
         'post' => [
             'denormalization_context' => ['groups' => 'create:categories']
@@ -22,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     itemOperations: [
         'get' => [
-            'normalization_context' => ['groups' => 'read:categories']
+            'normalization_context' => ['groups' => ['read:categories', 'read:default']]
         ],
         'patch' => [
             'denormalization_context' => ['groups' => 'update:category']
@@ -32,6 +36,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class Category
 {
+    use Timestamp;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]

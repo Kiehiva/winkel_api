@@ -9,11 +9,11 @@ trait Timestamp
 {
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    #[Groups(['read:default'])]
+    #[Groups(['read:timestamp'])]
     private $createAt;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    #[Groups(['read:default'])]
+    #[Groups(['read:timestamp'])]
     private $updatedAt;
 
     public function getCreateAt()

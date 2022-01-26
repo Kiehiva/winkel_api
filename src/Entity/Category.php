@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Traits\Slugger;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -26,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     itemOperations: [
         'get' => [
-            'normalization_context' => ['groups' => ['read:categories', 'read:default']]
+            'normalization_context' => ['groups' => ['read:categories', 'read:timestamp', 'read:slug']]
         ],
         'patch' => [
             'denormalization_context' => ['groups' => 'update:category']
@@ -36,7 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class Category
 {
-    use Timestamp;
+    use Timestamp, Slugger;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

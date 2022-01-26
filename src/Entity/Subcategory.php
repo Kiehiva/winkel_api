@@ -3,9 +3,12 @@
 namespace App\Entity;
 
 use App\Traits\Timestamp;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SubcategoryRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Traits\Slugger;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,7 +22,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         'post' => ['denormalization_context' => ['groups' => ['create:subcategories']]]
     ],
     itemOperations: [
-        'get' => ['normalization_context' => ['groups' => ['read:subcategories', 'read:default']]],
+        'get' => ['normalization_context' => ['groups' => ['read:subcategories', 'read:timestamp', 'read:slug']]],
         'patch' => ['denormalization_context' => ['groups' => ['update:subcategory']]],
         'delete'
     ]
@@ -27,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class Subcategory
 {
-    use Timestamp;
+    use Timestamp, Slugger;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -52,6 +55,14 @@ class Subcategory
     #[Groups(['create:subcategories', 'read:subcategories', 'update:subcategory'])]
     #[Assert\NotBlank(message: "Veuillez associer une catégorie")]
     private $category;
+
+    #[ORM\OneToMany(mappedBy: 'category', targetEntity: Product::class)]
+    private $products;
+
+    public function __construct()
+    {
+        $this->products = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -78,6 +89,36 @@ class Subcategory
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Product[]
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): self
+    {
+        if (!$this->products->contains($product)) {
+            $this->products[] = $product;
+            $product->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): self
+    {
+        if ($this->products->removeElement($product)) {
+            // set the owning side to null (unless already changed)
+            if ($product->getCategory() === $this) {
+                $product->setCategory(null);
+            }
+        }
 
         return $this;
     }

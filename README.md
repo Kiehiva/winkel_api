@@ -21,14 +21,14 @@ Lancer le service mysql
 ```
 Le service se lancera en arrière plan et la base de donnée se configurera automatiquement.
 
+Lancer le serveur Symfony
+```bash
+    symfony serve -d
+```
+
 Créer la base de donnée
 ```bash
     symfony console doctrine:migrations:migrate
-```
-
-Lancer le serveur
-```bash
-    symfony serve -d
 ```
 
 L'API sera dispo à l'addresse:

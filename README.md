@@ -36,6 +36,11 @@ L'API sera dispo à l'addresse:
     http://localhost:8000/api
 ```
 
+Pour charger un jeu de fausses données
+```bash
+    symfony console doctrine:fixtures:load --quiet
+```
+
 ### Arrêt 
 Stopper le serveur Symfony
 ```bash

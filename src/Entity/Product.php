@@ -87,6 +87,11 @@ class Product
     #[ORM\ManyToOne(targetEntity: Subcategory::class, inversedBy: 'products')]
     private $category;
 
+    #[ORM\ManyToOne(targetEntity: TVA::class, inversedBy: 'product')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["read:products"])]
+    private $TVA;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -160,6 +165,18 @@ class Product
     public function setCategory(?Subcategory $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getTVA(): ?TVA
+    {
+        return $this->TVA;
+    }
+
+    public function setTVA(?TVA $TVA): self
+    {
+        $this->TVA = $TVA;
 
         return $this;
     }

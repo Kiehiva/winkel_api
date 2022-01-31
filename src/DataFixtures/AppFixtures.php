@@ -6,6 +6,7 @@ use Faker\Factory;
 use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\Subcategory;
+use App\Entity\TVA;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -54,6 +55,22 @@ class AppFixtures extends Fixture
             ]
         ];
 
+        $tvas = [
+            "normal" => 0.2,
+            "intermediaire" => 0.1,
+            "reduit" => 0.055,
+            "particulier" => 0.021
+        ];
+
+        foreach ($tvas as $key => $tva) {
+            $new_tva = new TVA();
+            $new_tva
+                ->setName($key)
+                ->setValue($tva);
+            $manager->persist($new_tva);
+        }
+        $manager->flush();
+
         // Création des catégories
         foreach ($categories as $category) {
             $new_category = new Category();
@@ -80,6 +97,11 @@ class AppFixtures extends Fixture
                         ->setIsPublished($faker->boolean())
                         ->setCategory($new_subcategory)
                         ->setSlug($slugger->slug(strtolower($product->getName())));
+
+                    $tva_objects = $manager->getRepository(TVA::class)->findAll();
+                    /** @var TVA $tva_item */
+                    $tva_item = $faker->randomElements($tva_objects);
+                    $product->setTVA($tva_item[0]);
 
                     $manager->persist($product);
                 }

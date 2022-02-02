@@ -1,29 +1,57 @@
 security:
     enable_authenticator_manager: true
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
         App\Entity\Customer:
             algorithm: auto
         App\Entity\Admin:
             algorithm: auto
 
-
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
-        app_user_provider:
+        customer_provider:
+            entity:
+                class: App\Entity\Customer
+                property: email
+        admin_provider:
             entity:
                 class: App\Entity\Admin
                 property: username
-        # used to reload user from session & other features (e.g. switch_user)
+        users:
+            chain:
+                providers: [customer_provider, admin_provider]
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        login_customers:
+            pattern: ^/api/login
+            stateless: true
+            provider: customer_provider
+            json_login:
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        login_admins:
+            pattern: ^/api/admin/login
+            stateless: true
+            provider: admin_provider
+            json_login:
+                check_path: /api/admin/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: users
+            jwt: ~
+
         main:
             lazy: true
-            provider: app_user_provider
+            provider: users
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -34,8 +62,32 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        # CUSTOMERS
+        - { path: ^/api/customers, roles: PUBLIC_ACCESS, methods: [ POST ] }
+        - { path: ^/api/customers/*/update-password, roles: IS_AUTHENTICATED_FULLY, methods: [POST] }
+        - { path: ^/api/customers/*, roles: ROLE_ADMIN, methods: [GET, POST, PATCH] }
+
+        # CATEGORIES
+        - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/categories, roles: ROLE_ADMIN, methods: [POST, PATCH, DELETE] }
+
+        # SUBCATEGORIES
+        - { path: ^/api/subcategories, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/subcategories, roles: ROLE_ADMIN, methods: [POST, PATCH, DELETE] }
+
+        # PRODUCTS
+        - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/products, roles: ROLE_ADMIN, methods: [POST, PATCH, DELETE] }
+
+        # TVA
+        - { path: ^/api/t_v_as, roles: ROLE_ADMIN }
+
+        # ADMINS
+        - { path: ^/api/admins, roles: ROLE_NO_ACCESS }
+
+        # API
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
